@@ -994,13 +994,16 @@ namespace Internal
    static const linear_vector<combo_selection> video_drivers = {
 #if defined(_WIN32)
       { "gl", "OpenGL" },
-      { "d3d9", "Direct3D9" },
-      { "sdl", "SDL" },
+      { "vulkan", "Vulkan" },
+      { "d3d", "Direct3D" },
+      { "gdi", "GDI" },
+      { "sdl2", "SDL2" },
 #elif defined(__APPLE__)
       { "gl", "OpenGL" },
       { "sdl", "SDL" },
 #else
       { "gl", "OpenGL" },
+      { "vulkan", "Vulkan" },
       { "xvideo", "XVideo" },
       { "sdl", "SDL" },
 #endif
@@ -1012,10 +1015,10 @@ class ShaderVideo : public ToggleWindow
    public:
       ShaderVideo(ConfigFile &_conf) : ToggleWindow("RetroArch || Shader settings")
       {
-         widgets.append(PathSetting::shared(_conf, "video_shader", "Video Shader:", "", "Cg shader, Cg meta-shader, XML/GLSL, GLSL, GLSLP (*.cg,*.cgp,*.shader,*.glsl,*.glslp)"));
+         widgets.append(PathSetting::shared(_conf, "video_shader", "Video Shader:", "", "Cg shader, Cg meta-shader preset, GLSL shader, GLSL preset, Slang shader, Slang preset (*.cg,*.cgp,*.glsl,*.glslp,*.slang,*.slangp)"));
          widgets.append(BoolSetting::shared(_conf, "video_shader_enable", "Enable shader:", false));
          widgets.append(DirSetting::shared(_conf, "video_shader_dir", "Shader directory:", ""));
-         widgets.append(PathSetting::shared(_conf, "video_filter", "bSNES video filter:", "", "bSNES filter (*.filter)"));
+         widgets.append(PathSetting::shared(_conf, "video_filter", "Software video filter:", "", "Software video filter (*.filt)"));
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
