@@ -1274,6 +1274,7 @@ end:
          if (retroarch_path.length() == 0) retroarch_path = "retroarch";
          string rom_path;
          string config_path = config.getPath();
+         string libretro_path = libretro.getPath();
          string host;
          string port;
          string frames;
@@ -1293,6 +1294,9 @@ end:
             vec_cmd.append(config_path);
          else
             vec_cmd.append(m_cli_path);
+
+         vec_cmd.append("-L");
+         vec_cmd.append(libretro_path);
 
          vec_cmd.append("-v");
 
