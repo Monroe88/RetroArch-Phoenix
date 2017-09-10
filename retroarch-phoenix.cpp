@@ -1681,8 +1681,8 @@ end:
             audio.hide();
             input.hide();
 
-            remote.show();
-            remote.set_fd(fork_stdin_fd);
+            //remote.show();
+            //remote.set_fd(fork_stdin_fd);
          }
 
          if ((Internal::child_pid = fork()))
@@ -1789,8 +1789,8 @@ end:
                video.hide();
                audio.hide();
                input.hide();
-               remote.show();
-               remote.set_handle(writer_stdin);
+               //remote.show();
+               //remote.set_handle(writer_stdin);
 
                CloseHandle(writer);
                CloseHandle(reader_stdin);
