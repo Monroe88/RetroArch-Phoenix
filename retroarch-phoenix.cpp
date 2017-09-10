@@ -952,7 +952,7 @@ class MainWindow : public Window
          if (configs.gui.get("config_path", tmp)) config.setPath(tmp);
          config.setConfig(configs.gui, "config_path", {&MainWindow::reload_cli_config, this});
 
-         libretro.setConfig(configs.cli, "libretro_path",
+         libretro.setConfig(configs.gui, "libretro_path",
                [this](const string& path) {
                   update_rom_filter(path);
                });
@@ -971,7 +971,7 @@ class MainWindow : public Window
          print("Loading CLI path: ", m_cli_path, "\n");
          configs.cli = ConfigFile(m_cli_path);
          config.setPath(m_cli_path);
-         rom.setConfig(configs.cli, "phoenix_last_rom");
+         rom.setConfig(configs.gui, "phoenix_last_rom");
 
          init_cli_config();
       }
@@ -996,12 +996,12 @@ class MainWindow : public Window
       void init_cli_config()
       {
          string tmp;
-         if (configs.cli.get("libretro_path", tmp))
+         if (configs.gui.get("libretro_path", tmp))
             libretro.setPath(tmp);
          else
             libretro.setPath("");
 
-         if (configs.cli.get("phoenix_last_rom", tmp))
+         if (configs.gui.get("phoenix_last_rom", tmp))
             rom.setPath(tmp);
          else
             rom.setPath("");
@@ -1076,8 +1076,8 @@ class MainWindow : public Window
          start_btn.setText("Start RetroArch");
          vbox.append(rom.layout(), 3);
          vbox.append(rom_type.layout(), 5);
-         vbox.append(bsv_movie.layout(), 3);
-         vbox.append(bsv_movie.layout_opt(), 8);
+         //vbox.append(bsv_movie.layout(), 3);
+         //vbox.append(bsv_movie.layout_opt(), 8);
          record.save_file = true;
          record.setFilter("Matroska (*.mkv)", ".mkv");
          vbox.append(record.layout(), 3);
