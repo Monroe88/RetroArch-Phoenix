@@ -21,7 +21,8 @@
 #include "dynamic.h"
 #include "libretro.h"
 
-#ifdef _WIN32
+
+#ifdef UPDATER
 #include "updater.hpp"
 #endif
 
@@ -328,7 +329,7 @@ class MainWindow : public Window
       VerticalLayout vbox;
       Menu file_menu, settings_menu, help_menu;
 
-#ifdef _WIN32
+#ifdef UPDATER
       Menu updater_menu;
 #endif
 
@@ -341,7 +342,7 @@ class MainWindow : public Window
       Remote remote;
       ExtROM ext_rom;
 
-#ifdef _WIN32
+#ifdef UPDATER
       Updater updater;
 #endif
 
@@ -1238,14 +1239,14 @@ end:
 
       void start_retroarch()
       {
-#ifdef _WIN32
+#ifdef UPDATER
          updater.cancel();
 #endif
 
          if (libretro.getPath() == "")
          {
             MessageWindow::warning(*this,
-#ifdef _WIN32
+#ifdef UPDATER
                   "No libretro core is selected.\n"
                   "You can download a core from the RetroArch updater\n(RetroArch -> Update RetroArch)."
 #else
@@ -1854,7 +1855,7 @@ end:
          RadioItem dualanalog_2;
       } settings;
 
-#ifdef _WIN32
+#ifdef UPDATER
       struct
       {
          Item update;
@@ -1870,13 +1871,13 @@ end:
       {
          file_menu.setText("File");
          settings_menu.setText("Settings");
-#ifdef _WIN32
+#ifdef UPDATER
          updater_menu.setText("RetroArch");
 #endif
          help_menu.setText("Help");
          append(file_menu);
          append(settings_menu);
-#ifdef _WIN32
+#ifdef UPDATER
          append(updater_menu);
 #endif
          append(help_menu);
@@ -1944,7 +1945,7 @@ end:
          RadioItem::group(settings.gamepad_1, settings.dualanalog_1, settings.mouse_1, settings.none_1);
          RadioItem::group(settings.gamepad_2, settings.dualanalog_2, settings.multitap_2, settings.mouse_2, settings.scope_2, settings.justifier_2, settings.justifiers_2, settings.none_2);
 
-#ifdef _WIN32
+#ifdef UPDATER
          updater_elems.update.setText("Update RetroArch");
          updater_menu.append(updater_elems.update);
 #endif
@@ -1967,7 +1968,7 @@ end:
          settings.input.onTick = [this]() { input.show(); };
          file.ext_rom.onTick = [this]() { ext_rom.show(); };
 
-#ifdef _WIN32
+#ifdef UPDATER
          updater_elems.update.onTick = [this]() { updater.show(); };
          updater.libretro_path_cb = [this](const nall::string &path_)
          {
