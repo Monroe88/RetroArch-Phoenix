@@ -941,30 +941,40 @@ class General : public ToggleWindow
    public:
       General(ConfigFile &_pconf, ConfigFile &_conf) : ToggleWindow("RetroArch || General settings")
       {
-         widgets.append(DirSetting::shared(_conf, "rgui_browser_directory",
-            "RGUI ROM directory:", string("")));
          widgets.append(BoolSetting::shared(_conf, "rewind_enable", "Enable rewind:", false));
          widgets.append(IntSetting::shared(_conf, "rewind_buffer_size", "Rewind buffer size (MB):", 20));
          widgets.append(IntSetting::shared(_conf, "rewind_granularity", "Rewind frames granularity:", 1));
          widgets.append(DoubleSetting::shared(_conf, "slowmotion_ratio", "Slow motion ratio:", 3.0));
          widgets.append(BoolSetting::shared(_conf, "pause_nonactive", "Pause when window loses focus:", false));
+         widgets.append(BoolSetting::shared(_conf, "menu_pause_libretro", "Pause when menu is active:", true));
          widgets.append(IntSetting::shared(_conf, "autosave_interval", "Autosave interval (seconds):", 0));
          widgets.append(BoolSetting::shared(_conf, "block_sram_overwrite", "Block SRAM overwrite:", false));
          widgets.append(BoolSetting::shared(_conf, "savestate_auto_index", "Auto-increment save state slots:", false));
          widgets.append(BoolSetting::shared(_conf, "savestate_auto_save", "Autosave state on exit:", false));
+         widgets.append(BoolSetting::shared(_conf, "savestate_auto_load", "Autoload state on start:", false));
          widgets.append(BoolSetting::shared(_conf, "video_post_filter_record", "Records filtered output:", false));
          widgets.append(BoolSetting::shared(_conf, "video_gpu_record", "Records post-shaded output:", false));
+         widgets.append(BoolSetting::shared(_conf, "video_gpu_screenshot", "Screenshots use post-shaded output:", true));
+         widgets.append(BoolSetting::shared(_conf, "config_save_on_exit", "Allow config to save on exit:", false));
          widgets.append(BoolSetting::shared(_conf, "network_cmd_enable", "Enable UDP command interface:", false));
 
+         widgets.append(DirSetting::shared(_conf, "rgui_browser_directory",
+            "Menu File Browser directory:", string("")));
          widgets.append(DirSetting::shared(_conf, "system_directory", "System directory:", string("")));
-         widgets.append(PathSetting::shared(_conf, "cheat_database_path", "XML cheat database:", string(""), "XML files (*.xml)"));
-         widgets.append(PathSetting::shared(_conf, "cheat_settings_path", "XML cheat settings:", string(""), "Config files (*.cfg)"));
+         widgets.append(DirSetting::shared(_conf, "libretro_directory", "Libretro Cores directory:", string("")));
+         widgets.append(DirSetting::shared(_conf, "libretro_info_path", "Core Info directory:", string("")));
          widgets.append(DirSetting::shared(_conf, "savefile_directory", "Savefile/movie directory:", string("")));
          widgets.append(DirSetting::shared(_conf, "savestate_directory", "Savestate directory:", string("")));
          widgets.append(DirSetting::shared(_conf, "screenshot_directory", "Screenshot directory:", string("")));
-         widgets.append(PathSetting::shared(_conf, "core_options_path", "Core options config:", string(""), "Config files (*.cfg)"));
-         async_fork = BoolSetting::shared(_pconf, "async_fork", "Keep UI visible:", false);
+         widgets.append(DirSetting::shared(_conf, "rgui_config_directory", "Config directory:", string("")));
+         widgets.append(DirSetting::shared(_conf, "assets_directory", "Assets directory:", string("")));
+         widgets.append(DirSetting::shared(_conf, "overlay_directory", "Overlay directory:", string("")));
+         widgets.append(DirSetting::shared(_conf, "joypad_autoconfig_dir", "Joypad Autoconfig Profiles directory:", string("")));
+         widgets.append(DirSetting::shared(_conf, "rgui_config_directory", "Config directory:", string("")));
+         widgets.append(PathSetting::shared(_conf, "core_options_path", "Core options config:", string(""), "Config files (*.cfg,*.txt)"));
+         widgets.append(DirSetting::shared(_conf, "cheat_database_path", "Cheat directory:", string("")));
 
+         async_fork = BoolSetting::shared(_pconf, "async_fork", "Keep UI visible:", false);
          widgets.append(async_fork);
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
