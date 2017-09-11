@@ -1010,13 +1010,46 @@ namespace Internal
       { "sdl2", "SDL2" },
 #elif defined(__APPLE__)
       { "gl", "OpenGL" },
-      { "sdl", "SDL" },
+      { "sdl2", "SDL2" },
 #else
       { "gl", "OpenGL" },
       { "vulkan", "Vulkan" },
       { "xvideo", "XVideo" },
-      { "sdl", "SDL" },
+      { "sdl2", "SDL2" },
 #endif
+   };
+
+   static const linear_vector<combo_selection> aspect_ratio = {
+      { "0", "4:3" },
+      { "1", "16:9" },
+      { "2", "16:10" },
+      { "3", "16:15" },
+      { "4", "1:1" },
+      { "5", "2:1" },
+      { "6", "3:2" },
+      { "7", "3:4" },
+      { "8", "4:1" },
+      { "9", "4:4" },
+      { "10", "5:4" },
+      { "11", "6:5" },
+      { "12", "7:9" },
+      { "13", "8:3" },
+      { "14", "8:7" },
+      { "15", "19:12" },
+      { "16", "19:14" },
+      { "17", "30:17" },
+      { "18", "32:9" },
+      { "19", "Config" },
+      { "20", "1:1 PAR" },
+      { "21", "Core Provided" },
+      { "12", "Custom" },
+   };
+
+   static const linear_vector<combo_selection> rotation = {
+      { "0", "Normal" },
+      { "1", "90°" },
+      { "2", "180°" },
+      { "3", "270°" },
    };
 }
 
@@ -1029,6 +1062,7 @@ class ShaderVideo : public ToggleWindow
          widgets.append(BoolSetting::shared(_conf, "video_shader_enable", "Enable shader:", false));
          widgets.append(DirSetting::shared(_conf, "video_shader_dir", "Shader directory:", ""));
          widgets.append(PathSetting::shared(_conf, "video_filter", "Software video filter:", "", "Software video filter (*.filt)"));
+         widgets.append(DirSetting::shared(_conf, "video_filter_dir", "Software video filter directory:", ""));
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
@@ -1077,22 +1111,38 @@ class Video : public ToggleWindow
       Video(ConfigFile &_conf) : ToggleWindow("RetroArch || Video settings"), shader_setting(_conf), font_setting(_conf)
       {
          widgets.append(ComboSetting::shared(_conf, "video_driver", "Video driver:", Internal::video_drivers, 0));
-         widgets.append(DoubleSetting::shared(_conf, "video_xscale", "Windowed X scale:", 3.0));
-         widgets.append(DoubleSetting::shared(_conf, "video_yscale", "Windowed Y scale:", 3.0));
+         widgets.append(BoolSetting::shared(_conf, "video_fullscreen", "Start in fullscreen:", false));
+         widgets.append(BoolSetting::shared(_conf, "video_windowed_fullscreen", "Prefer windowed fullscreen:", true));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_x", "Fullscreen X resolution:", 0));
          widgets.append(IntSetting::shared(_conf, "video_fullscreen_y", "Fullscreen Y resolution:", 0));
          widgets.append(DoubleSetting::shared(_conf, "video_refresh_rate", "Monitor refresh rate (Hz):", 59.95));
+         widgets.append(DoubleSetting::shared(_conf, "video_scale", "Windowed scale:", 3.0));
+         widgets.append(IntSetting::shared(_conf, "video_window_x", "Fixed Windowed X size:", 0));
+         widgets.append(IntSetting::shared(_conf, "video_window_y", "Fixed Windowed Y size:", 0));
          widgets.append(BoolSetting::shared(_conf, "video_vsync", "VSync:", true));
-         widgets.append(BoolSetting::shared(_conf, "video_fullscreen", "Start in fullscreen:", false));
-         widgets.append(BoolSetting::shared(_conf, "video_windowed_fullscreen", "Prefer windowed fullscreen:", true));
+         widgets.append(BoolSetting::shared(_conf, "video_black_frame_insertion", "Black Frame Insertion:", false));
+         widgets.append(IntSetting::shared(_conf, "video_swap_interval", "Vsync Swap Interval:", 1));
+         widgets.append(IntSetting::shared(_conf, "video_max_swapchain_images", "Max Swapchain Images:", 3));
          widgets.append(IntSetting::shared(_conf, "video_monitor_index", "Preferred monitor index:", 0));
          widgets.append(BoolSetting::shared(_conf, "video_disable_composition", "Disable composition (Win Vista/7):", false));
          widgets.append(BoolSetting::shared(_conf, "video_smooth", "Bilinear filtering:", true));
-         widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
          widgets.append(BoolSetting::shared(_conf, "video_scale_integer", "Integer scale:", false));
          widgets.append(BoolSetting::shared(_conf, "video_crop_overscan", "Crop overscan:", true));
-         widgets.append(AspectSetting::shared(_conf, "video_aspect_ratio", "Aspect ratio:"));
-         widgets.append(BoolSetting::shared(_conf, "video_aspect_ratio_auto", "Prefer game aspect over 1:1 PAR:", false));
+         widgets.append(BoolSetting::shared(_conf, "video_hard_sync", "OpenGL Hard GPU sync:", false));
+         widgets.append(IntSetting::shared(_conf, "video_hard_sync_frames", "Hard GPU Sync frames:", 0));
+         widgets.append(IntSetting::shared(_conf, "video_frame_delay", "Frame Delay (ms):", 0));
+         widgets.append(BoolSetting::shared(_conf, "video_threaded", "Threaded Video:", false));
+         widgets.append(ComboSetting::shared(_conf, "video_rotation", "Rotation:", Internal::rotation, 0));
+         widgets.append(ComboSetting::shared(_conf, "aspect_ratio_index", "Aspect Ratio:", Internal::aspect_ratio, 21));
+         widgets.append(AspectSetting::shared(_conf, "video_aspect_ratio", "Config aspect ratio:"));
+         widgets.append(IntSetting::shared(_conf, "custom_viewport_width", "Custom Viewport width:", 640));
+         widgets.append(IntSetting::shared(_conf, "custom_viewport_height", "Custom Viewport height:", 480));
+         widgets.append(IntSetting::shared(_conf, "custom_viewport_x", "Custom Viewport X offset:", 0));
+         widgets.append(IntSetting::shared(_conf, "custom_viewport_y", "Custom Viewport Y offset:", 0));
+
+
+         //widgets.append(BoolSetting::shared(_conf, "video_aspect_ratio_auto", "Prefer game aspect over 1:1 PAR:", false));
+         //widgets.append(BoolSetting::shared(_conf, "video_force_aspect", "Lock aspect ratio:", true));
 
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
 
@@ -1151,12 +1201,12 @@ namespace Internal
 #ifdef _WIN32
       {"dsound", "DirectSound"},
       {"xaudio", "XAudio2"},
-      {"sdl", "SDL"},
-      {"rsound", "RSound"},
+      {"wasapi", "WASAPI"},
+      {"sdl2", "SDL2"},
 #elif defined(__APPLE__)
       {"coreaudio", "CoreAudio"},
       {"openal", "OpenAL"},
-      {"sdl", "SDL"},
+      {"sdl2", "SDL2"},
       {"rsound", "RSound"},
 #else
       {"alsa", "ALSA"},
@@ -1166,7 +1216,42 @@ namespace Internal
       {"rsound", "RSound"},
       {"roar", "RoarAudio"},
       {"openal", "OpenAL"},
-      {"sdl", "SDL"},
+      {"sdl2", "SDL2"},
+#endif
+   };
+
+   static const linear_vector<combo_selection> input_drivers = {
+#ifdef _WIN32
+      {"dinput", "DirectInput"},
+      {"raw", "Raw Input"},
+      {"sdl2", "SDL2"},
+#elif defined(__APPLE__)
+      {"cocoa", "Cocoa"},
+      {"sdl2", "SDL2"},
+#else
+      {"x", "X11"},
+      {"linuxraw", "Linuxraw"},
+      {"udev", "udev"},
+      {"wayland", "Wayland"},
+      {"sdl2", "SDL2"},
+#endif
+   };
+
+   static const linear_vector<combo_selection> joypad_drivers = {
+#ifdef _WIN32
+      {"xinput", "XInput"},
+      {"dinput", "DirectInput"},
+      {"hid", "USB HID"},
+      {"sdl2", "SDL2"},
+#elif defined(__APPLE__)
+      {"hid", "USB HID"},
+      {"sdl2", "SDL2"},
+#else
+      {"linuxraw", "Linuxraw"},
+      {"udev", "udev"},
+      {"hid", "USB HID"},
+      {"parport", "Parport"},
+      {"sdl2", "SDL2"},
 #endif
    };
 
@@ -1254,14 +1339,14 @@ namespace Internal
    };
 
    static const linear_vector<input_selection> misc = {
-      { "input_enable_hotkey", "Hold to use hotkeys", "", "" },
+      { "input_menu_toggle", "Menu toggle", "", "f1" },
       { "input_save_state", "Save state", "", "f2" },
       { "input_load_state", "Load state", "", "f4" },
       { "input_state_slot_increase", "Increase state slot", "", "f7" },
       { "input_state_slot_decrease", "Decrease state slot", "", "f6" },
       { "input_toggle_fast_forward", "Toggle fast forward", "", "space" },
       { "input_hold_fast_forward", "Hold fast forward", "", "l" },
-      { "input_exit_emulator", "Exit emulator", "", "escape" },
+      { "input_exit_emulator", "Exit RetroArch", "", "escape" },
       { "input_toggle_fullscreen", "Toggle fullscreen", "", "f" },
       { "input_pause_toggle", "Pause toggle", "", "p" },
       { "input_frame_advance", "Frame advance", "", "k" },
@@ -1281,9 +1366,13 @@ namespace Internal
       { "input_volume_up", "Increase volume", "", "kp_plus" },
       { "input_volume_down", "Decrease volume", "", "kp_minus" },
       { "input_overlay_next", "Overlay next", "", "" },
+      { "input_osk_toggle", "Toggle On-Screen Keyboard", "", "f12" },
       { "input_disk_eject_toggle", "Disk eject toggle", "", "" },
-      { "input_disk_next", "Disk next", "", "" },
-      { "input_menu_toggle", "RGUI menu toggle", "", "f1" },
+      { "input_disk_next", "Next Disk", "", "" },
+      { "input_disk_prev", "Previous Disk", "", "" },
+      { "input_enable_hotkey", "Hold to use hotkeys", "", "" },
+      { "input_game_focus_toggle", "Game Focus Toggle", "", "scroll_lock" },
+      { "input_grab_mouse_toggle", "Grab Mouse", "", "f11" },
    };
 
    static const linear_vector<linear_vector<input_selection>> binds = { 
@@ -1296,16 +1385,23 @@ class Audio : public ToggleWindow
    public:
       Audio(ConfigFile &_conf) : ToggleWindow("RetroArch || Audio settings")
       {
-         widgets.append(BoolSetting::shared(_conf, "audio_enable", "Enable audio:", true));
          widgets.append(ComboSetting::shared(_conf, "audio_driver", "Audio driver:", Internal::audio_drivers, 0));
-         widgets.append(PathSetting::shared(_conf, "audio_dsp_plugin", "Audio DSP plugin:", string(""), "Dynamic library (" DYNAMIC_EXTENSION ")"));
+         widgets.append(BoolSetting::shared(_conf, "audio_enable", "Enable audio:", true));
+         widgets.append(PathSetting::shared(_conf, "audio_dsp_plugin", "Audio DSP filter:", string(""), "Audio DSP filter (*.dsp)"));
+         widgets.append(DirSetting::shared(_conf, "audio_filter_dir", "Audio DSP filter directory:", ""));
          widgets.append(IntSetting::shared(_conf, "audio_out_rate", "Audio sample rate:", 48000));
          widgets.append(StringSetting::shared(_conf, "audio_device", "Audio device:", ""));
          widgets.append(BoolSetting::shared(_conf, "audio_sync", "Audio sync:", true));
          widgets.append(IntSetting::shared(_conf, "audio_latency", "Audio latency (ms):", 64));
          widgets.append(BoolSetting::shared(_conf, "audio_rate_control", "Dynamic rate control:", true));
          widgets.append(DoubleSetting::shared(_conf, "audio_rate_control_delta", "Rate control pitch delta:", 0.005));
+         widgets.append(DoubleSetting::shared(_conf, "audio_max_timing_skew", "Maximum Audio Timing Skew:", 0.05));
 
+#ifdef _WIN32
+         widgets.append(BoolSetting::shared(_conf, "audio_wasapi_exclusive_mode", "WASAPI Exclusive Mode:", true));
+         widgets.append(BoolSetting::shared(_conf, "audio_wasapi_float_format", "WASAPI Float format:", false));
+         widgets.append(IntSetting::shared(_conf, "audio_wasapi_sh_buffer_length", "WASAPI Shared Buffer length:", 0));
+#endif
          foreach(i, widgets) { vbox.append(i->layout(), 3); }
          vbox.setMargin(5);
          auto minimum = vbox.minimumGeometry();
@@ -1327,6 +1423,8 @@ class Input : public ToggleWindow
    public:
       Input(ConfigFile &_conf) : ToggleWindow("RetroArch || Input settings")
       {
+         widgets.append(ComboSetting::shared(_conf, "input_driver", "Input driver:", Internal::input_drivers, 0));
+         widgets.append(ComboSetting::shared(_conf, "input_joypad_driver", "Joypad driver:", Internal::joypad_drivers, 0));
          widgets.append(SliderSetting::shared(_conf, "input_axis_threshold", "Input axis threshold:", 0.5, 0.0, 1.0));
          widgets.append(PathSetting::shared(_conf, "input_overlay", "Overlay config:", string(""), "Config file (*.cfg)"));
          widgets.append(BoolSetting::shared(_conf, "netplay_client_swap_input", "Use Player 1 binds as netplay client:", true));
