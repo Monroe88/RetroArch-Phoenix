@@ -389,6 +389,41 @@ class SliderSetting : public SettingLayout, public util::Shared<SliderSetting>
       }
 };
 
+class IntSliderSetting : public SettingLayout, public util::Shared<IntSliderSetting>
+{
+   public:
+      IntSliderSetting(ConfigFile &_conf, const string& _key, const string& label, int _default, int _min, int _max)
+         : SettingLayout(_conf, _key, label), m_default(_default), m_min(_min), m_max(_max)
+      {
+         slider.setLength(m_max - m_min + 1);
+         slider.setPosition(m_max/2);
+         slider_label.setText(0);
+         slider.onChange = [this]() 
+         { 
+            int val = this->slider.position() + m_min;
+            this->conf.set(key, val); 
+            this->slider_label.setText((unsigned)val);
+         };
+         hlayout.append(slider, 150, 0, 3);
+         hlayout.append(slider_label, 0, 0);
+      }
+
+      void update()
+      {
+         int tmp = m_default;
+         conf.get(key, tmp);
+         slider.setPosition(tmp - m_min);
+         slider_label.setText(tmp);
+      }
+
+   private:
+      HorizontalSlider slider;
+      Label slider_label;
+      int m_default;
+      int m_min;
+      int m_max;
+};
+
 class AspectSetting : public SettingLayout, public util::Shared<AspectSetting>
 {
    public:
@@ -1121,16 +1156,16 @@ class Video : public ToggleWindow
          widgets.append(IntSetting::shared(_conf, "video_window_y", "Fixed Windowed Y size:", 0));
          widgets.append(BoolSetting::shared(_conf, "video_vsync", "VSync:", true));
          widgets.append(BoolSetting::shared(_conf, "video_black_frame_insertion", "Black Frame Insertion:", false));
-         widgets.append(IntSetting::shared(_conf, "video_swap_interval", "Vsync Swap Interval:", 1));
-         widgets.append(IntSetting::shared(_conf, "video_max_swapchain_images", "Max Swapchain Images:", 3));
+         widgets.append(IntSliderSetting::shared(_conf, "video_swap_interval", "Vsync Swap Interval:", 1, 1, 4));
+         widgets.append(IntSliderSetting::shared(_conf, "video_max_swapchain_images", "Max Swapchain Images:", 3, 1, 4));
          widgets.append(IntSetting::shared(_conf, "video_monitor_index", "Preferred monitor index:", 0));
          widgets.append(BoolSetting::shared(_conf, "video_disable_composition", "Disable composition (Win Vista/7):", false));
          widgets.append(BoolSetting::shared(_conf, "video_smooth", "Bilinear filtering:", true));
          widgets.append(BoolSetting::shared(_conf, "video_scale_integer", "Integer scale:", false));
          widgets.append(BoolSetting::shared(_conf, "video_crop_overscan", "Crop overscan:", true));
          widgets.append(BoolSetting::shared(_conf, "video_hard_sync", "OpenGL Hard GPU sync:", false));
-         widgets.append(IntSetting::shared(_conf, "video_hard_sync_frames", "Hard GPU Sync frames:", 0));
-         widgets.append(IntSetting::shared(_conf, "video_frame_delay", "Frame Delay (ms):", 0));
+         widgets.append(IntSliderSetting::shared(_conf, "video_hard_sync_frames", "Hard GPU Sync frames:", 0, 0, 3));
+         widgets.append(IntSliderSetting::shared(_conf, "video_frame_delay", "Frame Delay (ms):", 0, 0, 15));
          widgets.append(BoolSetting::shared(_conf, "video_threaded", "Threaded Video:", false));
          widgets.append(ComboSetting::shared(_conf, "video_rotation", "Rotation:", Internal::rotation, 0));
          widgets.append(ComboSetting::shared(_conf, "aspect_ratio_index", "Aspect Ratio:", Internal::aspect_ratio, 21));
